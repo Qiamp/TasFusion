@@ -5,8 +5,8 @@ set -e
 source "/opt/ros/noetic/setup.bash"
 
 # Automatically compile the workspace every time the container starts
-echo "--- Running catkin build to compile workspace ---"
-catkin build
+echo "--- Running catkin_make to compile workspace ---"
+catkin_make 
 echo "--- Compilation finished ---"
 
 # Source the local workspace for this initial shell

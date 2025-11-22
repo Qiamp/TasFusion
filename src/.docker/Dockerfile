@@ -27,23 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-roslint \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Build GTSAM and gtsam_points from source.
-# Critical Fix: Force GTSAM to use the system's pre-installed and compatible Eigen version
-# to prevent version mismatch errors during the final catkin_make stage.
-WORKDIR /root/third_party
-RUN git clone https://github.com/borglab/gtsam.git && \
-    cd gtsam && \
-    git checkout release/4.3a0 && \
-    mkdir build && cd build && \
-    cmake .. \
-        -DGTSAM_USE_SYSTEM_EIGEN=ON \
-        -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
-        -DGTSAM_BUILD_TESTS=OFF \
-        -DGTSAM_WITH_TBB=OFF \
-        -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF && \
-    make -j$(nproc) && \
-    make install
-
 # WORKDIR /root/third_party
 # RUN git clone https://github.com/koide3/gtsam_points.git && \
 #     cd gtsam_points && \
