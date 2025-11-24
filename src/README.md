@@ -1,8 +1,8 @@
-# Batch Board GNSS/IMU Fusion Workspace
+# ToySLAM GNSS/IMU Fusion Workspace
 
 ## 概览
 
-Batch Board 是一个面向多传感器导航的 ROS 1 工作区，核心提供基于 Ceres 的 GNSS/IMU 紧耦合滑动窗口优化，并配套 GNSS 消息定义、NLOS 排除工具、NovAtel 驱动、NMEA 解析与结果分析脚本。核心融合节点支持 IMU 预积分、偏置在线估计、边缘化保持历史信息以及 GPS 位置/速度约束，可通过 launch 参数灵活开启。
+ToySLAM 是一个面向多传感器导航的 ROS 1 工作区，核心提供基于 Ceres 的 GNSS/IMU 紧耦合滑动窗口优化，并配套 GNSS 消息定义、NLOS 排除工具、NovAtel 驱动、NMEA 解析与结果分析脚本。核心融合节点支持 IMU 预积分、偏置在线估计、边缘化保持历史信息以及 GPS 位置/速度约束，可通过 launch 参数灵活开启。
 
 ## 功能亮点
 
@@ -21,28 +21,29 @@ Batch Board 是一个面向多传感器导航的 ROS 1 工作区，核心提供�
 - `helper_scripts/`：用于频率分析与偏置绘制的脚本集合
 - `support_files/`：包含 toySLAM 教程 PDF 与ceres依赖包压缩文件，便于了解算法原理与环境准备
 - `data/rosbag/demo_rosbag.zip`：内置示例数据rosbag，可用于快速回放测试
-- /data/results：程序结果存储目录
+- data/results：程序结果存储目录
 
 ## 环境与依赖
 
 - ROS（建议 Noetic 或兼容版本）以及 catkin 构建工具。
-- 核心库：Eigen、Ceres Solver、Boost；可选 GFlags/Glog；从 CMake 可见必需依赖。【F:src/toyslam/CMakeLists.txt†L16-L99】
-- GNSS 工具库 `gnss_comm` 依赖 Eigen 与 Glog，并提供 docker 构建方案。【F:src/gnss_comm/README.md†L15-L54】
-- NLOS 处理需要 PCL 1.7 及 TF2 相关库。【F:src/nlosexclusion/CMakeLists.txt†L4-L46】
+- 核心库：Eigen、Ceres Solver，Glog等，从 CMake 可见必需依赖
 
 ## 构建步骤
 
 1. 创建工作区并克隆仓库（假设路径 `~/catkin_ws/src`）：
+
    ```bash
    cd ~/catkin_ws/src
    git clone <repo_url> batch_board_sw
    ```
 2. 安装系统依赖（以 Ubuntu/ROS 为例）：
+
    ```bash
    sudo apt-get install libeigen3-dev libceres-dev libboost-all-dev ros-$ROS_DISTRO-pcl-ros ros-$ROS_DISTRO-rviz
    sudo apt-get install libgoogle-glog-dev  # gnss_comm 需要
    ```
 3. 在工作区根目录编译并加载环境：
+
    ```bash
    cd ~/catkin_ws
    catkin_make
@@ -55,12 +56,14 @@ Batch Board 是一个面向多传感器导航的 ROS 1 工作区，核心提供�
 
 1. 解压示例数据：`unzip data/rosbag/demo_rosbag.zip -d data/rosbag`。
 2. 启动融合节点与可视化（默认启用 RViz）：
+
    ```bash
    roslaunch toyslam batch_board.launch
    ```
 
    启动文件允许切换 GPS/IMU 话题、开启偏置估计与滑窗大小等参数。【F:src/toyslam/launch/batch_board.launch†L4-L118】
 3. 回放 rosbag（示例文件名以解压后实际为准）：
+
    ```bash
    rosbag play data/rosbag/<your_demo>.bag
    ```

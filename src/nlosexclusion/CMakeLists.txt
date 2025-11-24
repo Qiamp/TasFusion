@@ -30,8 +30,6 @@ generate_messages(
   )
 
 catkin_package(
-
-
   CATKIN_DEPENDS message_runtime roscpp message_filters nodelet sensor_msgs tf2 tf2_ros
 )
 
@@ -39,11 +37,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
-
-find_package(PCL 1.7 REQUIRED)
-include_directories(include ${PCL_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
 
 
 install(DIRECTORY include/${PROJECT_NAME}/

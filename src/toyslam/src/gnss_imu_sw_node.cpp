@@ -921,10 +921,10 @@ public:
         // Reorder the Jacobian to have [kept_params | marg_params] in pose7-vel3-bias6 order
         Eigen::MatrixXd reordered_jacobians = Eigen::MatrixXd::Zero(total_residual_size, total_block_size_local);
         
-        // 定义参数块顺序：pose(7) -> vel(3) -> bias(6)
+        // Define parameter block order: pose(7) -> vel(3) -> bias(6)
         std::vector<int> param_order = {7, 3, 6}; // pose, vel, bias
         
-        // 按照固定顺序重新排列kept参数
+        // Reordering kept parameters first by defined order
         int col_idx = 0;
         int reorderd_block_size = 0;
         std::vector<int> reordered_block_sizes;
@@ -932,16 +932,16 @@ public:
         std::vector<double*> reordered_keep_data;
         std::vector<int> reordered_keep_idx;
         
-        // 先按照参数类型顺序排列kept参数
+        // Reordering kept parameters first by defined order
         for (int param_size : param_order) {
             for (int i = 0; i < static_cast<int>(keep_block_addr.size()); i++) {
                 double* addr = keep_block_addr[i];
                 if (!addr) continue;
                 
                 int size = parameter_block_size[addr];
-                if (size != param_size) continue; // 只处理当前大小的参数
+                if (size != param_size) continue; // Only process parameters of the current size
                 reordered_block_sizes.push_back(size);
-                size = localSize(size); // 调整大小
+                size = localSize(size); // Adjust size
                 reorderd_block_size += size;
                 
                 int idx = keep_block_idx[i];
@@ -956,25 +956,25 @@ public:
                 reordered_jacobians.block(0, col_idx, total_residual_size, size) = 
                     linearized_jacobians.block(0, idx, total_residual_size, size);
                 
-                // 保存重新排序后的keep参数信息
+                // Save reordered keep parameter information
                 reordered_keep_addr.push_back(addr);
                 reordered_keep_data.push_back(keep_block_data[i]);
-                reordered_keep_idx.push_back(col_idx); // 新的索引位置
+                reordered_keep_idx.push_back(col_idx); // New index position
                 
                 col_idx += size;
             }
         }
         
-        // 按照固定顺序排列marginalized参数
+        // Reordering marginalized parameters by defined order
         for (int param_size : param_order) {
             for (const auto& it : parameter_block_idx) {
                 double* addr = it.first;
                 if (!addr) continue;
                 
                 int size = parameter_block_size[addr];
-                if (size != param_size) continue; // 只处理当前大小的参数
+                if (size != param_size) continue; // Only process parameters of the current size
 
-                size = localSize(size); // 调整大小
+                size = localSize(size); // Adjust size
                 
                 // Skip if this parameter is kept
                 if (std::find(keep_block_addr.begin(), keep_block_addr.end(), addr) != keep_block_addr.end()) {
@@ -997,7 +997,7 @@ public:
             }
         }
         
-        // 更新keep参数的信息为重新排序后的
+        // Update kept parameter information to reordered versions
         keep_block_sizes = reordered_block_sizes;
         keep_block_size = reorderd_block_size;
         keep_block_addr = reordered_keep_addr;
@@ -1284,8 +1284,8 @@ public:
         private_nh.param<std::string>("body_frame_id", body_frame_id_, "base_link");
 
         private_nh.param<bool>("enable_consistency_check", enable_consistency_check_, false);
-        private_nh.param<double>("nis_threshold_position", nis_threshold_position_, 11.345); // 卡方, 3 DoF, 95%
-        private_nh.param<double>("nis_threshold_velocity", nis_threshold_velocity_, 11.345); // 卡方, 3 DoF, 95%
+        private_nh.param<double>("nis_threshold_position", nis_threshold_position_, 11.345); // Chi-square, 3 DoF, 95%
+        private_nh.param<double>("nis_threshold_velocity", nis_threshold_velocity_, 11.345); // Chi-square, 3 DoF, 95%
         private_nh.param<double>("max_covariance_scale_factor", max_covariance_scale_factor_, 100000.0);
         private_nh.param<int>("initial_grace_epochs", initial_grace_epochs_, 50);
         
@@ -1793,19 +1793,19 @@ private:
 
     // Update optimized path in publishOptimizedPose 
     void updateOptimizedPath() {
-        // 首先检查 state_window_ 是否为空
+        // Check if state_window_ is empty
         if (state_window_.empty()) {
             ROS_WARN("state_window_ is empty, cannot update optimized path.");
             return;
         }
 
-        // 获取 state_window_ 中的最新状态
-        // 假设 StateType 是 state_window_ 中存储的元素类型
+        // Get the latest state from state_window_
+        // Assuming StateType is the type stored in state_window_
         const auto& latest_state = state_window_.back();
 
         geometry_msgs::PoseStamped pose_stamped;
-        pose_stamped.header.stamp = ros::Time(latest_state.timestamp); // 使用最新状态的时间戳
-        pose_stamped.header.frame_id = world_frame_id_; // 假设 world_frame_id_ 仍然是成员变量
+        pose_stamped.header.stamp = ros::Time(latest_state.timestamp); // Use the latest state's timestamp
+        pose_stamped.header.frame_id = world_frame_id_;
         
         // Position
         pose_stamped.pose.position.x = latest_state.position.x();
@@ -1818,7 +1818,7 @@ private:
         pose_stamped.pose.orientation.y = latest_state.orientation.y();
         pose_stamped.pose.orientation.z = latest_state.orientation.z();
         
-        optimized_path_msg_.header.stamp = ros::Time(latest_state.timestamp); // 使用最新状态的时间戳
+        optimized_path_msg_.header.stamp = ros::Time(latest_state.timestamp); // Use the latest state's timestamp
         optimized_path_msg_.poses.push_back(pose_stamped);
         
         // // Limit path size 
@@ -1858,20 +1858,20 @@ private:
     void syncEnuReference() {
         GnssParser* source_parser = nullptr;
 
-        // 1. 寻找一个已经设置了参考点的"源"解析器
+        // 1. Find a "source" parser that has already set the reference point
         for (GnssParser* parser : all_parsers_) {
             if (parser->hasEnuReference()) {
                 source_parser = parser;
-                break; // 找到第一个就退出
+                break; // Found the first one, then exit
             }
         }
 
-        // 2. 如果找到了源，就用它的参考点去更新所有其他解析器
+        // 2. If a source is found, use its reference point to update all other parsers
         if (source_parser != nullptr) {
             double ref_lat, ref_lon, ref_alt;
-            // 从源解析器获取参考点坐标
+            // Get reference point coordinates from the source parser
             if (source_parser->getEnuReference(ref_lat, ref_lon, ref_alt)) {
-                // 保存参考点用于ENU到LLA转换
+                // Save reference point for ENU to LLA conversion
                 if (!has_enu_reference_) {
                     ref_lat_ = ref_lat;
                     ref_lon_ = ref_lon;
@@ -1881,7 +1881,7 @@ private:
                             ref_lat_, ref_lon_, ref_alt_);
                 }
                 
-                // 广播给所有解析器（包括源自身，重复设置无害）
+                // Broadcast to all parsers (including the source itself, redundant setting is harmless)
                 for (GnssParser* parser : all_parsers_) {
                     if (!parser->hasEnuReference()) {
                         parser->setEnuReference(ref_lat, ref_lon, ref_alt);
@@ -2355,7 +2355,7 @@ private:
         try {
             std::lock_guard<std::mutex> lock(data_mutex_);
             
-            // 4. 可视化与存储
+            // 4. Visualization and storage
             if (measurement.position_valid) {
                 geometry_msgs::PoseStamped pose_stamped;
                 pose_stamped.header.stamp = ros::Time(measurement.timestamp);
@@ -2363,7 +2363,7 @@ private:
                 pose_stamped.pose.position.x = measurement.position.x();
                 pose_stamped.pose.position.y = measurement.position.y();
                 pose_stamped.pose.position.z = measurement.position.z();
-                pose_stamped.pose.orientation.x = 0.0; // 默认四元数，实际应用中可能需要更改
+                pose_stamped.pose.orientation.x = 0.0; // Default quaternion, may need to be changed in actual application
                 pose_stamped.pose.orientation.y = 0.0;
                 pose_stamped.pose.orientation.z = 0.0;
                 pose_stamped.pose.orientation.w = 1.0;
@@ -2373,7 +2373,7 @@ private:
             
             gps_measurements_.push_back(measurement);
 
-            // 5. 系统初始化
+            // 5. System initialization
             if (!is_initialized_) {
                 if (imu_buffer_.size() >= 5) {
                     ROS_INFO("Initializing system with GNSS measurement at timestamp: %.3f", measurement.timestamp);
@@ -2383,7 +2383,7 @@ private:
                 return;
             }
 
-            // 6. 创建关键帧
+            // 6. Create keyframe
             if (is_initialized_ && has_imu_data_) {
                 bool has_surrounding_imu_data = false;
                 double closest_time_diff = std::numeric_limits<double>::max();
@@ -2410,7 +2410,7 @@ private:
     }
 
     void openLogFiles() {
-        // GPS 输入日志
+        // GPS input log
         gps_log_file_.open(gps_log_path_);
         if (gps_log_file_.is_open()) {
             gps_log_file_ << "timestamp,px,py,pz,vx,vy,vz\n";
@@ -2419,7 +2419,7 @@ private:
             ROS_ERROR("Failed to open GPS log file: %s", gps_log_path_.c_str());
         }
 
-        // Ground Truth 真值日志
+        // Ground Truth log
         gt_log_file_.open(gt_log_path_);
         if (gt_log_file_.is_open()) {
             gt_log_file_ << "timestamp,px,py,pz,vx,vy,vz,roll,pitch,yaw\n";
@@ -2428,7 +2428,7 @@ private:
             ROS_ERROR("Failed to open Ground Truth log file: %s", gt_log_path_.c_str());
         }
         
-        // 优化结果日志
+        // Optimized state log
         optimized_log_file_.open(optimized_log_path_);
         if (optimized_log_file_.is_open()) {
             optimized_log_file_ << "timestamp,px,py,pz,qx,qy,qz,qw,roll,pitch,yaw,vx,vy,vz,bax,bay,baz,bgx,bgy,bgz,lat,lon,alt\n";
@@ -2458,12 +2458,12 @@ private:
 
     void logOptimizedState(const State& state) {
         if (optimized_log_file_.is_open()) {
-            // 计算LLA坐标
+            // Calculate LLA coordinates
             double lat = 0.0, lon = 0.0, alt = 0.0;
             bool lla_valid = convertEnuToLla(state.position, lat, lon, alt);
             
-            // 计算欧拉角（弧度转度）
-            Eigen::Vector3d euler_rad = state.orientation.toRotationMatrix().eulerAngles(0, 1, 2); // Roll, Pitch, Yaw顺序
+            // Calculate Euler angles (radians to degrees)
+            Eigen::Vector3d euler_rad = state.orientation.toRotationMatrix().eulerAngles(0, 1, 2); // Roll, Pitch, Yaw order
             double roll_deg = euler_rad.x() * 180.0 / M_PI;
             double pitch_deg = euler_rad.y() * 180.0 / M_PI;
             double yaw_deg = euler_rad.z() * 180.0 / M_PI;
@@ -2476,7 +2476,7 @@ private:
                                     << state.acc_bias.x() << "," << state.acc_bias.y() << "," << state.acc_bias.z() << ","
                                     << state.gyro_bias.x() << "," << state.gyro_bias.y() << "," << state.gyro_bias.z();
             
-            // 添加LLA坐标列
+            // Add LLA coordinate columns
             if (lla_valid) {
                 optimized_log_file_ << "," << std::setprecision(8) << lat << "," << lon << "," << std::setprecision(6) << alt;
             } else {
@@ -2494,7 +2494,7 @@ private:
         if (meas_opt) {
             logGroundTruthData(*meas_opt);
             
-            // 可选: 发布真值轨迹用于RViz可视化
+            // Optional: Publish ground truth trajectory for RViz visualization
             geometry_msgs::PoseStamped pose_stamped;
             pose_stamped.header.stamp = ros::Time(meas_opt->timestamp);
             pose_stamped.header.frame_id = world_frame_id_;
@@ -2510,13 +2510,13 @@ private:
 
 
     void inspvaxCallback(const novatel_msgs::INSPVAX::ConstPtr& msg) {
-        // 1. 解析消息
+        // 1. Parse message
         std::optional<GnssMeasurement> meas_opt = inspvax_parser_.parse(msg);
         
         if (meas_opt) {
             GnssMeasurement meas = *meas_opt;
 
-            // 2. 条件性地添加噪声
+            // 2. Conditionally add noise
             if (subscribe_to_ground_truth_ && (gnss_topic_ == ground_truth_topic_) &&
                 (artificial_pos_noise_std_ > 0.0 || artificial_vel_noise_std_ > 0.0))
             {
@@ -2534,23 +2534,23 @@ private:
                 meas.velocity.z() += vel_noise(random_generator_);
             }
             
-            // 3. 记录FGO的GPS输入 (可能是原始的，也可能是加噪后的)
+            // 3. Log FGO GPS input (may be original or noise-added)
             logGpsData(meas);
             syncEnuReference();
 
-            // 4. 使用该测量值进行融合处理
+            // 4. Use this measurement for fusion processing
             processGnssMeasurement(meas);
         }
     }
 
     void gnssCommCallback(const gnss_comm::GnssPVTSolnMsg::ConstPtr& msg) {
-        // 调用对应的解析器
+        // Call the corresponding parser
         std::optional<GnssMeasurement> meas_opt = gnss_comm_parser_.parse(msg);
-        // 如果解析成功，则传递给统一的处理函数
+        // If parsing is successful, pass it to the unified processing function
         if (meas_opt) {
             // gps_measurement_count_++;
             // if (gps_measurement_count_ % 10 != 0) {
-            //     return; // 每10个测量只处理一次
+            //     return; // Process only once every 10 measurements
             // }
             GnssMeasurement meas = *meas_opt;
             processGnssMeasurement(*meas_opt);
@@ -2560,10 +2560,10 @@ private:
     }
 
     void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg) {
-        // 调用 Odometry 解析器
+        // Call the Odometry parser
         std::optional<GnssMeasurement> meas_opt = odom_parser_.parse(msg);
         
-        // 如果解析成功，则传递给统一的处理函数
+        // If parsing is successful, pass it to the unified processing function
         if (meas_opt) {
             GnssMeasurement meas = *meas_opt;
             processGnssMeasurement(*meas_opt);
@@ -3297,13 +3297,13 @@ private:
                     }
                     // Add GPS position factor
                     if(matching_gps_meas) {
-                        // --- A. 为边缘化问题添加GPS位置因子 ---
-                        // 检查标志位，并使用之前在 optimizeFactorGraph 中存储的、最终使用的协方差
+                        // --- A. Add GPS position factor for marginalization ---                     
+                        // Check flag and use the final covariance stored previously in optimizeFactorGraph
                         if (oldest_state.has_gps_pos_factor) {
                             // ROS_INFO("Marginalizing GPS position factor with stored covariance.");
                             ceres::CostFunction* gps_factor = GpsPositionFactor::Create(
                                 matching_gps_meas->position,
-                                oldest_state.final_gps_pos_cov // ★ 使用存储的协方差
+                                oldest_state.final_gps_pos_cov // ★ Use stored covariance
                             );
                             
                             std::vector<double*> parameter_blocks = {pose_param1};
@@ -3312,13 +3312,13 @@ private:
                             marginalization_info->addResidualBlockInfo(residual_info);
                         }
                         
-                        // --- B. 为边缘化问题添加GPS速度因子 ---
-                        // 检查标志位，并使用存储的协方差
+                        // --- B. Add GPS velocity factor for marginalization ---
+                        // Check flag and use the final covariance stored previously in optimizeFactorGraph
                         if (use_gps_velocity_ && oldest_state.has_gps_vel_factor) {
                             // ROS_INFO("Marginalizing GPS velocity factor with stored covariance.");
                             ceres::CostFunction* gps_vel_factor = GpsVelocityFactor::Create(
                                 matching_gps_meas->velocity,
-                                oldest_state.final_gps_vel_cov // ★ 使用存储的协方差
+                                oldest_state.final_gps_vel_cov // ★ Use stored covariance
                             );
                             
                             std::vector<double*> vel_parameter_blocks = {vel_param1};
@@ -3849,7 +3849,7 @@ private:
                 for (size_t i = 0; i < state_window_.size(); ++i) {
                     double keyframe_time = state_window_[i].timestamp;
                     
-                    // 找到匹配的GPS测量数据
+                    // Find matching GPS measurement
                     std::optional<GnssMeasurement> matching_gps_meas;
                     for (const auto& gps : gps_measurements_) {
                         if (std::abs(gps.timestamp - keyframe_time) < 0.05) {
@@ -3862,14 +3862,14 @@ private:
                         continue;
                     }
 
-                    // 重置当前帧的标志位和协方差
+                    // Reset flags and covariances for the current frame
                     state_window_[i].has_gps_pos_factor = false;
                     state_window_[i].has_gps_vel_factor = false;
 
                     double pos_covariance_scale = 1.0;
                     double vel_covariance_scale = 1.0;
 
-                    // --- 卡方一致性检验 (从第二个关键帧开始) ---
+                    // --- Chi-square consistency check (starting from the second keyframe) ---
                     if (enable_consistency_check_ && i > 0 && optimization_count_ > initial_grace_epochs_) {
                         const auto& prev_state = state_window_[i-1];
                         const auto& current_meas = *matching_gps_meas;
@@ -3881,7 +3881,7 @@ private:
 
                             State propagated_state = propagateState(prev_state, current_meas.timestamp);
 
-                            // --- 位置检验 ---
+                            // --- Position check ---
                             if (current_meas.position_valid) {
                                 Eigen::Vector3d predicted_pos = propagated_state.position;
                                 Eigen::Vector3d innovation_pos = current_meas.position - predicted_pos;
@@ -3896,7 +3896,7 @@ private:
                                 }
                             }
                             
-                            // --- 速度检验 ---
+                            // --- Velocity check ---
                             if (use_gps_velocity_ && current_meas.velocity_valid) {
                                 Eigen::Vector3d predicted_vel = propagated_state.velocity;
                                 Eigen::Vector3d innovation_vel = current_meas.velocity - predicted_vel;
@@ -3913,21 +3913,21 @@ private:
                         }
                     }
 
-                    // --- 添加GPS位置因子 ---
+                    // --- Add GPS position factor ---
                     if (matching_gps_meas->position_valid) {
                         Eigen::Matrix3d position_noise_cov = matching_gps_meas->position_covariance.norm() > 1e-8 ?
                                                             matching_gps_meas->position_covariance :
                                                             Eigen::Matrix3d::Identity() * gps_position_noise_ * gps_position_noise_;
                         
-                        position_noise_cov *= pos_covariance_scale; // 应用缩放因子
+                        position_noise_cov *= pos_covariance_scale; // Apply scaling factor
 
-                        const double min_pos_variance = 0.0004; // 对应标准差为 0.2米 (20cm)
+                        const double min_pos_variance = 0.0004; // Corresponds to a standard deviation of 0.2 meters (20cm)
                         if (position_noise_cov.trace() < min_pos_variance * 3) {
-                            // 如果协方差矩阵太小，就用设定的下限值来覆盖它
+                            // If the covariance matrix is too small, override it with the set lower limit
                             position_noise_cov = Eigen::Matrix3d::Identity() * min_pos_variance;
                             // ROS_WARN("GPS position covariance is too optimistic. Using floor value (std=%.2f m).", std::sqrt(min_pos_variance));
                         }
-                        // 【重要】将最终使用的协方差存入State对象，供边缘化使用
+                        // [Important] Store the final covariance used in the State object for marginalization
                         state_window_[i].final_gps_pos_cov = position_noise_cov;
                         state_window_[i].has_gps_pos_factor = true;
 
@@ -3936,20 +3936,20 @@ private:
                         // ROS_INFO("Added GPS position factor at frame %zu (time %.3f) with covariance %.2f", i, keyframe_time,position_noise_cov.trace());
                     }
 
-                    // --- 添加GPS速度因子 ---
+                    // --- Add GPS velocity factor ---
                     if (use_gps_velocity_ && matching_gps_meas->velocity_valid) {
                         Eigen::Matrix3d velocity_noise_cov = matching_gps_meas->velocity_covariance.norm() > 1e-8 ?
                                                             matching_gps_meas->velocity_covariance :
                                                             Eigen::Matrix3d::Identity() * gps_velocity_noise_ * gps_velocity_noise_;
                         
-                        velocity_noise_cov *= vel_covariance_scale; // 应用缩放因子
+                        velocity_noise_cov *= vel_covariance_scale; // Apply scaling factor
 
-                        const double min_vel_variance = 0.0001; // 对应标准差为 0.1m/s
+                        const double min_vel_variance = 0.0001; // Corresponds to a standard deviation of 0.1m/s
                         if (velocity_noise_cov.trace() < min_vel_variance * 3) {
                             velocity_noise_cov = Eigen::Matrix3d::Identity() * min_vel_variance;
                             // ROS_WARN("GPS velocity covariance is too optimistic. Using floor value (std=%.2f m/s).", std::sqrt(min_vel_variance));
                         }
-                        // 【重要】将最终使用的协方差存入State对象，供边缘化使用
+                        // [Important] Store the final covariance used in the State object for marginalization
                         state_window_[i].final_gps_vel_cov = velocity_noise_cov;
                         state_window_[i].has_gps_vel_factor = true;
                         
@@ -4098,12 +4098,12 @@ private:
                     //         variables[i].pose[3], variables[i].pose[4], variables[i].pose[5], variables[i].pose[6],
                     //         variables[i+1].pose[3], variables[i+1].pose[4], variables[i+1].pose[5], variables[i+1].pose[6]);
 
-                    // 计算初始 residual
+                    // Calculate initial residual
                     // double residuals[15]; 
                     // double* parameters[6] = {variables[i].pose, variables[i].velocity, variables[i].bias,
                     //                         variables[i+1].pose, variables[i+1].velocity, variables[i+1].bias};
                     // imu_factor_->Evaluate(parameters, residuals, nullptr);
-                    // // 打印所有初始的residual
+                    // // Print all initial residuals
                     // for (size_t j = 0; j < 15; ++j) {
                     //     ROS_INFO("Initial Residuals for IMU factor [%zu]: %.6f", j, residuals[j]);
                     // }
@@ -4166,7 +4166,7 @@ private:
 
 
             // if (!problem.Evaluate(eval_options, &initial_cost, &initial_residuals, nullptr, nullptr)) {
-            //     // nullptr 用于雅可比和梯度，因为我们这里只关心残差和代价
+            //     // nullptr is used for Jacobians and gradients because we only care about residuals and cost here
             //     std::cerr << "ERROR: Problem::Evaluate() failed before optimization. "
             //             << "Check problem construction and initial parameter values." << std::endl;
             // } else {
@@ -4177,7 +4177,7 @@ private:
             //         std::cout << "  residual[" << i << "] = " << initial_residuals[i] << std::endl;
             //     }
 
-            //     // 如果你想看到 Ceres 在迭代 0 开始时会看到的 cost (即应用了损失函数)
+            //     // If you want to see the cost that Ceres sees at the start of iteration 0 (i.e., with the loss function applied)
             //     eval_options.apply_loss_function = true;
             //     double initial_cost_with_loss;
             //     if (problem.Evaluate(eval_options, &initial_cost_with_loss, nullptr, nullptr, nullptr)) {
@@ -4311,7 +4311,7 @@ private:
                     state_window_[i].acc_bias = new_acc_bias;
                     state_window_[i].gyro_bias = new_gyro_bias;
 
-                    // 打印零偏
+                    // Print biases
                     // ROS_INFO("Epoch %zu: Acc Bias [%.6f, %.6f, %.6f], Gyro Bias [%.6f, %.6f, %.6f]",
                     //     i,
                     //     new_acc_bias.x(), new_acc_bias.y(), new_acc_bias.z(),
@@ -4527,19 +4527,18 @@ private:
     // Publish optimized pose
     void publishOptimizedPose() {
         try {
-            // 首先检查 state_window_ 是否为空，以避免访问空容器的 back() 导致错误
+            // First, check if state_window_ is empty to avoid errors from accessing the back() of an empty container
             if (state_window_.empty()) {
                 ROS_WARN("state_window_ is empty, cannot publish optimized pose.");
                 return;
             }
 
-            // 获取 state_window_ 中的最新状态
-            // 假设 StateType 是 state_window_ 中存储的元素类型
-            // 如果 state_window_ 中的元素是指针或智能指针，您可能需要解引用
-            const auto& latest_state = state_window_.back(); // 或者 state_window_.back() 如果不是指针
-
+            // Get the latest state from state_window_
+            // Assume StateType is the type of elements stored in state_window_
+            // If the elements in state_window_ are pointers or smart pointers, you may need to dereference
+            const auto& latest_state = state_window_.back(); // Or state_window_.back() if not a pointer
             nav_msgs::Odometry odom_msg;
-            odom_msg.header.stamp = ros::Time(latest_state.timestamp); // 使用最新状态的时间戳
+            odom_msg.header.stamp = ros::Time(latest_state.timestamp); // Use the timestamp of the latest state
             odom_msg.header.frame_id = world_frame_id_; // "map"
             odom_msg.child_frame_id = body_frame_id_;   // "base_link"
             
@@ -4591,13 +4590,13 @@ private:
             tf_broadcaster_.sendTransform(transform_stamped);
             
             // Update and publish the optimized path
-            // 注意：如果 updateOptimizedPath() 函数也依赖于 current_state_，
-            // 那么它可能也需要被修改以使用 state_window_ 中的最新状态，
-            // 或者将最新的状态作为参数传递给它。
-            // 这里我们假设 updateOptimizedPath() 要么不依赖特定状态，要么内部会正确处理。
+            // Note: If the updateOptimizedPath() function also depends on current_state_,
+            // it may need to be modified to use the latest state from state_window_,
+            // or the latest state could be passed to it as a parameter.
+            // Here we assume updateOptimizedPath() either does not depend on a specific state or handles it correctly internally.
             updateOptimizedPath();
 
-            // 新增：发布LLA姿态
+            // Publish LLA pose
             publishLlaPose(latest_state);
             
         } catch (const std::exception& e) {
@@ -4979,28 +4978,28 @@ private:
         }
         
         try {
-            // 1. 准备参考点LLA坐标 (原始参考点)
+            // 1. Prepare reference point LLA coordinates (original reference point)
             Eigen::MatrixXd originllh(3, 1);
-            originllh(0) = ref_lon_;  // 经度
-            originllh(1) = ref_lat_;  // 纬度  
-            originllh(2) = ref_alt_;  // 高度
+            originllh(0) = ref_lon_;  // Longitude
+            originllh(1) = ref_lat_;  // Latitude  
+            originllh(2) = ref_alt_;  // Altitude
             
-            // 2. 准备ENU坐标
+            // 2. Prepare ENU coordinates
             Eigen::MatrixXd enu(3, 1);
             enu(0) = enu_pos.x();  // East
             enu(1) = enu_pos.y();  // North
             enu(2) = enu_pos.z();  // Up
             
-            // 3. 使用GNSS_Tools将ENU转换为ECEF
+            // 3. Use GNSS_Tools to convert ENU to ECEF
             Eigen::MatrixXd ecef = m_GNSS_Tools.enu2ecef(originllh, enu);
             
-            // 4. 使用GNSS_Tools将ECEF转换为LLA
+            // 4. Use GNSS_Tools to convert ECEF to LLA
             Eigen::MatrixXd lla = m_GNSS_Tools.ecef2llh(ecef);
             
-            // 5. 提取结果
-            lon = lla(0);  // 经度
-            lat = lla(1);  // 纬度
-            alt = lla(2);  // 高度
+            // 5. Extract results
+            lon = lla(0);  // Longitude
+            lat = lla(1);  // Latitude
+            alt = lla(2);  // Altitude
             
             return true;
             
@@ -5042,9 +5041,9 @@ private:
             
             lla_pose_pub_.publish(lla_msg);
             
-            // Debug output (可选，用于验证转换结果)
+            // Debug output (optional, for verifying conversion results)
             static int debug_count = 0;
-            if (debug_count++ % 100 == 0) { // 每100次输出一次调试信息
+            if (debug_count++ % 100 == 0) { // Output debug information every 100 times
                 ROS_DEBUG("ENU [%.3f, %.3f, %.3f] -> LLA [%.8f, %.8f, %.3f]", 
                         state.position.x(), state.position.y(), state.position.z(),
                         lat, lon, alt);
