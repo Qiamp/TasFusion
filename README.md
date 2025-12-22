@@ -1,5 +1,15 @@
 # ToySLAM GNSS/IMU Fusion Workspace
 
+## Author
+
+| Author Name | Affiliation      | Contact Email               |
+| :----------: | ---------------- | --------------------------- |
+|  Gao Yixin  | HK PolyU TAS LAB | yixin.gao@connect.polyu.hk  |
+| Wang Xiangru | HK PolyU TAS LAB | xiangru.wang@polyu.edu.hk   |
+|  ZHAO Jiaqi  | HK PolyU TAS LAB | jiaqi.zhao@connect.polyu.hk |
+
+[PolyU TASLab](https://polyu-taslab.github.io/): https://polyu-taslab.github.io/
+
 ## Overview
 
 ToySLAM is a ROS1 package designed for multi-sensor navigation. Its core functionality provides a Ceres-based GNSS/IMU loosely coupled sliding-window optimization framework, along with supporting tools including GNSS message definitions, NLOS exclusion utilities, a NovAtel driver, and NMEA ROS parsing scripts.
@@ -231,8 +241,8 @@ The node can export key signals and metrics to CSV. Ensure the directory exists 
   <img src="data/results/demo.gif" alt="ToySLAM Demo" width="800"/>
 </p>
 
-## 参考资料
+## References
 
-- `support_files/toySLAM_Tutorial.pdf`：包含算法推导与实验说明。
-- `gnss_comm` 提供 GNSS 原始测量处理的背景与依赖说明。【F:src/gnss_comm/README.md†L1-L60】
-- NovAtel 官方 Wiki 链接在 `novatel_span_driver` README 中，可获取设备配置详情。【F:src/novatel_span_driver/README.md†L1-L8】
+* **`Support_files/toySLAM_Tutorial.pdf` :** Detailed algorithm derivations and experimental explanations.
+* **[GNSS_COMM Official Wiki](https://github.com/HKUST-Aerial-Robotics/gnss_comm)** : Documentation for GNSS raw measurement definitions and related tools.
+* **[NovAtel Official Wiki](https://wiki.ros.org/novatel_span_driver)** : Official documentation for NovAtel GNSS/INS receivers and message formats.
