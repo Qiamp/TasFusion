@@ -1,12 +1,23 @@
-/*
-Ceres Logger
-A simple C++ class for logging optimization results and metrics from Ceres Solver.
-This class provides methods to log optimized parameters, solver summaries, and metadata
-to specified files. It ensures thread safety and allows for easy configuration of output formats.
-
-Added by Xiangru, with help of Gemini
-Date: 2025-05-06
+/**
+* This file is part of toyslam.
+*
+* Copyright (C) 2025 Trustworthy AI and Autonomous Systems Laboratory, The Hong Kong Polytechnic University (PolyU)
+* Author: Wang Xiangru (xiangru.wang@polyu.edu.hk)
+*
+* toyslam is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* toyslam is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with toyslam. If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once // Use pragma once for header guard
 
 #include <fstream>

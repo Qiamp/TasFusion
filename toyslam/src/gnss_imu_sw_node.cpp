@@ -1,6 +1,23 @@
-// 版权
-//Yixin Xiangru Jiaqi 
-//TAS LAB
+/**
+* This file is part of toyslam.
+*
+* Copyright (C) 2025 Trustworthy AI and Autonomous Systems Laboratory, The Hong Kong Polytechnic University (PolyU)
+* Author: ZHAO Jiaqi (jiaqi.zhao@connect.polyu.hk) Wang Xiangru (xiangru.wang@polyu.edu.hk) Gao Yixin (yixin.gao@connect.polyu.hk)
+*
+* toyslam is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* toyslam is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with toyslam. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PointStamped.h>
