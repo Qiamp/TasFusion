@@ -1,25 +1,44 @@
 # ToySLAM GNSS/IMU Fusion Workspace
 
-## 概览
+## Overview
 
-ToySLAM 是一个面向多传感器导航的 ROS1 Package，核心提供基于 Ceres 的 GNSS/IMU 紧耦合滑动窗口优化，并配套 GNSS 消息定义、NLOS 排除工具、NovAtel 驱动、NMEA 解析与结果分析脚本。核心融合节点支持 IMU 预积分、偏置在线估计、边缘化保持历史信息以及 GPS 位置/速度约束，可通过 launch 参数灵活开启。
+ToySLAM is a ROS1 package designed for multi-sensor navigation. Its core functionality provides a Ceres-based GNSS/IMU loosely coupled sliding-window optimization framework, along with supporting tools including GNSS message definitions, NLOS exclusion utilities, a NovAtel driver, and NMEA ROS parsing scripts.
 
-## 功能亮点
+The central sensor-fusion node supports IMU pre-integration, online bias estimation, marginalization to preserve historical information, and GPS position/velocity constraints. All major functions can be flexibly enabled or disabled through parameters configured in launch files.
 
-- **滑动窗口优化与边缘化**：`toyslam` 的 CMake 配置显示依赖 Ceres、Eigen、Boost 和 ROS 核心库，驱动 `gnss_imu_sw_node` 进行非线性优化
-- **可配置的传感器输入**：启动文件提供 IMU、GPS、真值话题与消息类型选择，支持 GPS 速度/姿态初始化，并可开关偏置估计、边缘化与速度/姿态约束权重
-- **日志与可视化**：默认启动 RViz 轨迹视图，并可将 GPS/真值/优化结果、指标与偏置写入 CSV 路径，便于后处理
-- **辅助脚本与工具链**：提供 rosbag 话题频率分析、偏置可视化等 Python 工具，便于数据质量评估
+## Key Features
+
+* **Sliding-Window Nonlinear Optimization with Marginalization**
+
+  `toyslam` implements a GNSS/IMU loosely coupled sliding-window optimization framework based on  **Ceres Solver** ,  **Eigen** , and core **ROS** libraries. The central node `gnss_imu_sw_node` performs nonlinear least-squares optimization within a fixed-size window, while marginalization is applied to retain historical information and maintain computational efficiency.
+* **Highly Configurable Sensor Inputs and Fusion Strategy**
+
+  Launch files provide flexible configuration of IMU, GNSS, and ground-truth topics and message types. The system supports GPS-based position, velocity, and attitude initialization, and allows users to enable or disable online bias estimation, marginalization, and velocity/attitude constraint weighting via parameters, facilitating ablation studies and algorithm evaluation.
+* **Logging and Visualization Support**
+
+  RViz-based trajectory visualization is enabled by default. The system can also export GNSS measurements, ground truth, optimized states, performance metrics, and IMU biases to CSV files for offline post-processing, benchmarking, and result reproduction.
+* **Auxiliary Scripts and Toolchain**
+
+  A set of Python utilities is provided, including rosbag topic frequency analysis and bias visualization tools, enabling rapid assessment of sensor data quality and system behavior.
+* **Support for Multiple GNSS Message Types**
+
+  The fusion node supports multiple GNSS data formats, selectable via the `gnss_message_type` parameter:
+
+  * `novatel_msgs/INSPVAX`
+  * `gnss_comm/GnssPVTSolnMsg`
+  * `nav_msgs/Odometry`
+
+  This design allows seamless integration with different GNSS receivers and data pipelines.
 
 ## 仓库结构
 
 - `toyslam/`：核心 GNSS/IMU 融合节点、rviz 配置与启动文件，负责滑动窗口优化与数据记录
-- `nlosexclusion/`：GNSS NLOS 排除相关消息定义与 PCL/TF 工具依赖配置
-- [novatel_span_driver/](https://github.com/ros-drivers/novatel_span_driver.git)：连接 NovAtel SPAN 接收机的以太网驱动包
+- `nlosexclusion/`：GNSS NLOS 排除相关消息定义与实现
+- [novatel_span_driver/](https://github.com/ros-drivers/novatel_span_driver.git)：连接 NovAtel SPAN 接收机的ROS驱动包
 - [gnss_comm/](https://github.com/HKUST-Aerial-Robotics/gnss_comm.git)：GNSS 原始测量的定义与工具库，包含依赖说明与 Docker 支持
-- `nmea_parser/`：基于 `gnss_comm` 的 NMEA 解析包骨架，声明 ROS/标准消息依赖
-- `helper_scripts/`：用于频率分析与偏置绘制的脚本集合
-- `support_files/`：包含 toySLAM 教程 PDF 与ceres依赖包压缩文件，便于了解算法原理与环境准备
+- `nmea_parser/`：基于 `gnss_comm` 的 NMEA 解析包
+- `helper_scripts/`：用于分析及图像绘制的脚本集合
+- `support_files/`：包含 toySLAM 教程 PDF 与ceres、Eigen依赖包压缩文件
 - `data/rosbag/demo_rosbag.zip`：内置示例数据rosbag，可用于快速回放测试
 - `data/results/`：程序结果存储目录
 

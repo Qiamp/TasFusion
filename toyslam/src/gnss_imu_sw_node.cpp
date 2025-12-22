@@ -17,28 +17,28 @@
 #include <cmath>
 #include <limits>
 #include <chrono>
-#include <novatel_msgs/INSPVAX.h>  // Added INSPVAX message header
-#include <gnss_comm/GnssPVTSolnMsg.h>  // Added GNSS PVT solution message header
+#include <novatel_msgs/INSPVAX.h>
+#include <gnss_comm/GnssPVTSolnMsg.h>
 #include <sensor_msgs/NavSatFix.h>
 
-// Added for visualization
+//Visualization
 #include <nav_msgs/Path.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <iomanip>  // For std::setprecision
-#include <sstream>  // For std::stringstream
-#include <fstream>  // For std::ofstream
+#include <iomanip>
+#include <sstream>
+#include <fstream>
 
 #include <random>
 
-// Added for cooridnate frame conversions
+//Cooridnate frame conversions
 #include "../include/gnss_tools.h"
 GNSS_Tools m_GNSS_Tools;
 
 #include "../include/imu_preint.h"
 #include "../include/imu_factor.h"
 
-// added for logging result from ceres, and other information inlcuding computation load
+//Logging result from ceres, and other information inlcuding computation load
 #include "../include/ceres_logger.h"
 #include "../include/utility.h"
 #include "../include/gnss_parser.h"
@@ -1073,9 +1073,6 @@ public:
         Eigen::VectorXd sqrt_evs = evs.array().sqrt().matrix();
         sqrt_D.diagonal() = sqrt_evs;
 
-        // print out the size of the P, D, and b_
-        // ROS_INFO("P size: %d, D size: %d, b_ size: %d", P.rows(), sqrt_D.diagonal().size(), linearized_residuals.size());
-
         // compute the whole jocobian, and residual
         linearized_jacobians_ = sqrt_D * P.transpose();
         linearized_residuals_ = - (sqrt_D.inverse() * P.transpose() * b_prior);
@@ -1179,11 +1176,6 @@ public:
         Eigen::Map<Eigen::VectorXd>(residuals, n) = marginalization_info->getLinearizedResiduals() + marginalization_info->getLinearizedJacobians() * dx;
         // ROS_INFO_STREAM("Residualas: "<<marginalization_info->getLinearizedResiduals() + marginalization_info->getLinearizedJacobians() * dx);
 
-
-        // Fill residuals
-        // for (int i = 0; i < num_residuals() && i < linearized_residuals.size(); i++) {
-        //     residuals[i] = linearized_residuals(i);
-        // }
 
         // Check if jacobians are requested
         if (!jacobians) {
@@ -1581,21 +1573,21 @@ private:
     double gps_velocity_noise_;
     double gps_orientation_noise_;
 
-    // --- Ground Truth 相关成员 ---
+    // --- Ground Truth Members ---
     ros::Subscriber ground_truth_sub_;
     std::string ground_truth_topic_;
     bool subscribe_to_ground_truth_;
     std::ofstream gt_log_file_;
     std::string gt_log_path_;
 
-    // GPS Input (FGO输入) 相关成员
+    // GPS Input (FGO Input) Members
     double artificial_pos_noise_std_;
     double artificial_vel_noise_std_;
     std::ofstream gps_log_file_;
     std::string gps_log_path_;
     std::default_random_engine random_generator_;
 
-    // Optimized State (优化结果) 记录成员
+    // Optimized State (Optimized Results) Members
     std::ofstream optimized_log_file_;
     std::string optimized_log_path_;
 
@@ -1603,7 +1595,7 @@ private:
     ros::Subscriber gnss_sub_;
     std::string gnss_topic_;
     int gnss_queue_size_;
-    std::string gnss_message_type_; // 用于从工厂创建正确的解析器
+    std::string gnss_message_type_; // Used to create the correct parser from the factory
 
     // create parser for every kind of GNSS message
     GnssCommParser gnss_comm_parser_;
@@ -1820,11 +1812,6 @@ private:
         
         optimized_path_msg_.header.stamp = ros::Time(latest_state.timestamp); // Use the latest state's timestamp
         optimized_path_msg_.poses.push_back(pose_stamped);
-        
-        // // Limit path size 
-        // if (optimized_path_msg_.poses.size() > 1000) {
-        //     optimized_path_msg_.poses.erase(optimized_path_msg_.poses.begin());
-        // }
         
         // Publish the optimized path
         optimized_path_pub_.publish(optimized_path_msg_);
@@ -2884,27 +2871,6 @@ private:
         return closest_imu;
     }
 
-    // // Helper to add IMU orientation factor
-    // void addImuOrientationFactor(ceres::Problem& problem, 
-    //                            double* pose_param, 
-    //                            const sensor_msgs::Imu& imu_msg) {
-    //     // Create quaternion from IMU message
-    //     Eigen::Quaterniond q_imu(
-    //         imu_msg.orientation.w,
-    //         imu_msg.orientation.x,
-    //         imu_msg.orientation.y,
-    //         imu_msg.orientation.z
-    //     );
-        
-    //     // Ensure quaternion is normalized
-    //     q_imu.normalize();
-        
-    //     // Only constrain yaw rotation
-    //     ceres::CostFunction* yaw_factor = 
-    //         YawOnlyOrientationFactor::Create(q_imu, imu_orientation_weight_);
-    //     problem.AddResidualBlock(yaw_factor, nullptr, pose_param);
-    // }
-
     // Check if bias values are within reasonable limits
     bool areBiasesReasonable(const Eigen::Vector3d& acc_bias, const Eigen::Vector3d& gyro_bias) {
         // Check accelerometer bias
@@ -3197,14 +3163,6 @@ private:
                 }
             }
 
-            // // add IMU measurement to the preintegration map
-            // // extract the data first, including the stamp in seconds, the acceleration, and the angular velocity
-            // double unix_timestamp = msg->header.stamp.toSec();
-            // Eigen::Vector3d acc(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
-            // Eigen::Vector3d gyro(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
-            // // add the IMU measurement to the preintegration map
-            // current_preint_test.push_back(unix_timestamp, acc, gyro);
-
         } catch (const std::exception& e) {
             ROS_ERROR("Exception in imuCallback: %s", e.what());
         }
@@ -3335,17 +3293,6 @@ private:
                 double start_time = oldest_state.timestamp;
                 double end_time = next_state.timestamp;
                 std::pair<double, double> key(start_time, end_time);
-                
-                // if (preintegration_map_.find(key) != preintegration_map_.end()) {
-                //     const auto& preint = preintegration_map_[key];
-                    
-                //     // Create IMU factor
-                //     ceres::CostFunction* imu_factor = ImuFactor::Create(preint, gravity_world_);
-                    
-                //     std::vector<double*> parameter_blocks = {
-                //         pose_param1, vel_param1, bias_param1,
-                //         pose_param2, vel_param2, bias_param2
-                //     };
 
                 // adopt to new imu factor
                 if (preintegration_map_test.find(key) != preintegration_map_test.end()) {
@@ -3363,95 +3310,8 @@ private:
                     auto* residual_info = new ResidualBlockInfo(
                         imu_factor_, nullptr, parameter_blocks, drop_set);
                     marginalization_info->addResidualBlockInfo(residual_info);
-                    
-                    // // Add orientation smoothness factor between states if enabled
-                    // if (enable_orientation_smoothness_factor_) {
-                    //     ceres::CostFunction* orientation_factor = 
-                    //         OrientationSmoothnessFactor::Create(orientation_smoothness_weight_);
-                        
-                    //     std::vector<double*> orientation_params = {pose_param1, pose_param2};
-                    //     std::vector<int> orientation_drop_set = {0}; // Drop only the oldest pose
-                        
-                    //     auto* orientation_residual = new ResidualBlockInfo(
-                    //         orientation_factor, nullptr, orientation_params, orientation_drop_set);
-                    //     marginalization_info->addResidualBlockInfo(orientation_residual);
-                    // }
                 }
                 
-                // Add roll/pitch prior for oldest state if enabled
-                // if (enable_roll_pitch_constraint_) {
-                //     ceres::CostFunction* roll_pitch_factor = RollPitchPriorFactor::Create(roll_pitch_weight_);
-                //     std::vector<double*> parameter_blocks = {pose_param1};
-                //     std::vector<int> drop_set = {0}; // Drop the pose parameter
-                    
-                //     auto* residual_info = new ResidualBlockInfo(
-                //         roll_pitch_factor, nullptr, parameter_blocks, drop_set);
-                //     marginalization_info->addResidualBlockInfo(residual_info);
-                // }
-                
-                
-                // sensor_msgs::Imu closest_imu = findClosestImuMeasurement(oldest_state.timestamp);
-               
-                // // If IMU has orientation and orientation factor is enabled, add yaw-only factor
-                // if (enable_imu_orientation_factor_ && closest_imu.header.stamp.toSec() > 0 &&
-                //     closest_imu.orientation_covariance[0] != -1) {
-                //     Eigen::Quaterniond q_imu(
-                //         closest_imu.orientation.w,
-                //         closest_imu.orientation.x,
-                //         closest_imu.orientation.y,
-                //         closest_imu.orientation.z
-                //     );
-                    
-                //     ceres::CostFunction* yaw_factor = YawOnlyOrientationFactor::Create(q_imu, imu_orientation_weight_);
-                //     std::vector<double*> yaw_params = {pose_param1};
-                //     std::vector<int> yaw_drop_set = {0}; // Drop the pose parameter
-                    
-                //     auto* yaw_residual = new ResidualBlockInfo(
-                //         yaw_factor, nullptr, yaw_params, yaw_drop_set);
-                //     marginalization_info->addResidualBlockInfo(yaw_residual);
-                // }
-                
-                // // Add velocity constraint if enabled
-                // if (enable_velocity_constraint_) {
-                //     // Use adaptive max velocity based on IMU data
-                //     double adaptive_max_velocity = max_velocity_;
-                //     if (imu_buffer_.size() > 10) {
-                //         adaptive_max_velocity = estimateMaxVelocityFromImu();
-                //     }
-                    
-                //     ceres::CostFunction* vel_constraint = VelocityMagnitudeConstraint::Create(
-                //         adaptive_max_velocity, velocity_constraint_weight_);
-                //     std::vector<double*> parameter_blocks = {vel_param1};
-                //     std::vector<int> drop_set = {0}; // Drop the velocity parameter
-                    
-                //     auto* residual_info = new ResidualBlockInfo(
-                //         vel_constraint, nullptr, parameter_blocks, drop_set);
-                //     marginalization_info->addResidualBlockInfo(residual_info);
-                // }
-                
-                // // Add horizontal velocity incentive if enabled
-                // if (enable_horizontal_velocity_incentive_) {
-                //     ceres::CostFunction* h_vel_incentive = HorizontalVelocityIncentiveFactor::Create(
-                //         min_horizontal_velocity_, horizontal_velocity_weight_);
-                //     std::vector<double*> parameter_blocks = {vel_param1, pose_param1};
-                //     std::vector<int> drop_set = {0, 1}; // Drop both parameters
-                    
-                //     auto* residual_info = new ResidualBlockInfo(
-                //         h_vel_incentive, nullptr, parameter_blocks, drop_set);
-                //     marginalization_info->addResidualBlockInfo(residual_info);
-                // }
-                
-                // // Add bias constraint
-                // if (enable_bias_estimation_) {
-                //     ceres::CostFunction* bias_constraint = BiasMagnitudeConstraint::Create(
-                //         acc_bias_max_, gyro_bias_max_, bias_constraint_weight_);
-                //     std::vector<double*> parameter_blocks = {bias_param1};
-                //     std::vector<int> drop_set = {0}; // Drop the bias parameter
-                    
-                //     auto* residual_info = new MarginalizationInfo::ResidualBlockInfo(
-                //         bias_constraint, nullptr, parameter_blocks, drop_set);
-                //     marginalization_info->addResidualBlockInfo(residual_info);
-                // }
 
                 // add last marginalization factor 
                 if(last_marginalization_info_) {
@@ -3563,24 +3423,6 @@ private:
             } else {
                     ROS_WARN_THROTTLE(10.0, "GPS data not available for drift correction.");
             }
-            
-            // // Compute preintegration data between keyframes
-            // for (size_t i = 0; i < state_window_.size() - 1; ++i) {
-            //     double start_time = state_window_[i].timestamp;
-            //     double end_time = state_window_[i+1].timestamp;
-                
-            //     std::pair<double, double> key(start_time, end_time);
-                
-            //     // if (preintegration_map_.find(key) == preintegration_map_.end()) {
-            //         // performPreintegrationBetweenKeyframes_(state_window_[i], state_window_[i+1], 
-            //         //                                      state_window_[i].acc_bias, 
-            //         //                                      state_window_[i].gyro_bias);
-            //         // performPreintegrationBetweenKeyframes(start_time, end_time, 
-            //         //                                       state_window_[i].acc_bias, 
-            //         //                                       state_window_[i].gyro_bias);
-            //         // performPreintegrationBetweenKeyframes_()
-            //     // }
-            // }
 
             // Time the factor graph optimization
             auto start_time = std::chrono::high_resolution_clock::now();
@@ -3993,63 +3835,6 @@ private:
                 }
             }
             
-            // // Add IMU orientation factors if enabled
-            // if (enable_imu_orientation_factor_) {
-            //     ROS_INFO("Added IMU orientation factors");
-            //     for (size_t i = 0; i < state_window_.size(); ++i) {
-            //         double keyframe_time = state_window_[i].timestamp;
-                    
-            //         // Find IMU measurement closest to this keyframe
-            //         sensor_msgs::Imu closest_imu = findClosestImuMeasurement(keyframe_time);
-                    
-            //         // If valid IMU orientation, add orientation factor
-            //         if (closest_imu.header.stamp.toSec() > 0 && 
-            //             closest_imu.orientation_covariance[0] != -1) {
-                        
-            //             double time_diff = std::abs(closest_imu.header.stamp.toSec() - keyframe_time);
-            //             if (time_diff < 0.05) { // 50ms threshold
-            //                 addImuOrientationFactor(problem, variables[i].pose, closest_imu);
-            //             }
-            //         }
-            //     }
-            // }
-            
-            // // CRITICAL: Add hard constraints on bias magnitude if bias estimation is enabled
-            // if (enable_bias_estimation_) {
-            //     ROS_INFO("Added bias magnitude constraints");
-            //     for (size_t i = 0; i < state_window_.size(); ++i) {
-            //         ceres::CostFunction* bias_constraint = BiasMagnitudeConstraint::Create(
-            //             acc_bias_max_, gyro_bias_max_, bias_constraint_weight_);
-                    
-            //         problem.AddResidualBlock(bias_constraint, nullptr, variables[i].bias);
-            //     }
-            // }
-            
-            // // IMPROVED: Add adaptive velocity magnitude constraints if enabled
-            // if (enable_velocity_constraint_) {
-            //     ROS_INFO("Added adaptive velocity magnitude constraints");
-            //     // Estimate max velocity from IMU data for adaptive constraints
-            //     double adaptive_max_velocity = max_velocity_;
-            //     if (imu_buffer_.size() > 10) {
-            //         adaptive_max_velocity = estimateMaxVelocityFromImu();
-            //     }
-                
-            //     for (size_t i = 0; i < state_window_.size(); ++i) {
-            //         ceres::CostFunction* velocity_constraint = VelocityMagnitudeConstraint::Create(
-            //             adaptive_max_velocity, velocity_constraint_weight_);
-            //         problem.AddResidualBlock(velocity_constraint, nullptr, variables[i].velocity);
-            //     }
-            // }
-            
-            // // FIXED: Add horizontal velocity incentive factors that only enforce minimum magnitude
-            // if (enable_horizontal_velocity_incentive_) {
-            //     ROS_INFO("Added horizontal velocity incentive factors");
-            //     for (size_t i = 0; i < state_window_.size(); ++i) {
-            //         ceres::CostFunction* h_vel_incentive = HorizontalVelocityIncentiveFactor::Create(
-            //             min_horizontal_velocity_, horizontal_velocity_weight_);
-            //         problem.AddResidualBlock(h_vel_incentive, nullptr, variables[i].velocity, variables[i].pose);
-            //     }
-            // }
             
             // Add IMU pre-integration factors between keyframes
             for (size_t i = 0; i < state_window_.size() - 1; ++i) {
@@ -4062,16 +3847,7 @@ private:
                 std::pair<double, double> key(start_time, end_time);
                 
                 if (preintegration_map_test.find(key) != preintegration_map_test.end()) {
-                    // const auto& preint = preintegration_map_[key];
-                    
-                    // // IMPROVED: Pass bias correction threshold to IMU factor
-                    // ceres::CostFunction* imu_factor = ImuFactor::Create(
-                    //     preint, gravity_world_, bias_correction_threshold_);
-                    
-                    // // IMPROVED: Use HuberLoss for IMU factor
-                    // problem.AddResidualBlock(imu_factor, NULL,
-                    //                        variables[i].pose, variables[i].velocity, variables[i].bias,
-                    //                        variables[i+1].pose, variables[i+1].velocity, variables[i+1].bias);
+
                     auto& preint = preintegration_map_test[key];
                     ceres::CostFunction* imu_factor_ = new imu_factor(&preint);
 
@@ -4118,12 +3894,6 @@ private:
                 // CRITICAL: Always use exactly 6 parameter blocks in the exact order expected
                 // Adding the residual block with state variables in the correct order, without checks
                 if (state_window_.size() >= 2) {
-                    // problem.AddResidualBlock(factor, nullptr,
-                    //                        variables[1].pose, variables[1].velocity, variables[1].bias,
-                    //                        variables[0].pose, variables[0].velocity, variables[0].bias);
-                    // problem.AddResidualBlock(factor, nullptr,
-                    //                        variables[0].pose, variables[0].velocity, variables[0].bias,
-                    //                        variables[1].pose, variables[1].velocity, variables[1].bias);
                     problem.AddResidualBlock(factor, nullptr,
                         variables[0].pose, variables[0].velocity, variables[0].bias);
                 }
@@ -4139,55 +3909,6 @@ private:
             // options.linear_solver_type = ceres::SPARSE_SCHUR;
             options.trust_region_strategy_type = ceres::DOGLEG;
             // options.line_search_direction_type = ceres::LBFGS;
-
-            // ROS_INFO("Optimization problem has %zu residuals and %zu parameter blocks",
-            //         problem.NumResiduals(), problem.NumParameterBlocks());
-            // add output for debug use
-            // options.minimizer_progress_to_stdout = false;
-            // options.minimizer_progress_to_stdout = true;
-
-            // options.num_threads = 160;
-
-            // // //compare with auto computed jacobian
-            // options.check_gradients = true;
-            // options.gradient_check_relative_precision = 1e-2;
-
-            // // print the initial residuals
-            // std::cout << "Evaluating initial residuals before optimization..." << std::endl;
-
-            // double initial_cost;
-            // std::vector<double> initial_residuals;
-            // ceres::Problem::EvaluateOptions eval_options;
-            // eval_options.apply_loss_function = false;
-
-            // std::vector<double*> parameter_block_ptrs;
-            // problem.GetParameterBlocks(&parameter_block_ptrs);
-            // eval_options.parameter_blocks = parameter_block_ptrs;
-
-
-            // if (!problem.Evaluate(eval_options, &initial_cost, &initial_residuals, nullptr, nullptr)) {
-            //     // nullptr is used for Jacobians and gradients because we only care about residuals and cost here
-            //     std::cerr << "ERROR: Problem::Evaluate() failed before optimization. "
-            //             << "Check problem construction and initial parameter values." << std::endl;
-            // } else {
-            //     std::cout << "Initial Cost (raw, 0.5 * sum(residuals^2)): " << initial_cost << std::endl;
-            //     std::cout << "Number of initial residuals: " << initial_residuals.size() << std::endl;
-            //     std::cout << "Initial Residuals:" << std::endl;
-            //     for (size_t i = 0; i < initial_residuals.size(); ++i) {
-            //         std::cout << "  residual[" << i << "] = " << initial_residuals[i] << std::endl;
-            //     }
-
-            //     // If you want to see the cost that Ceres sees at the start of iteration 0 (i.e., with the loss function applied)
-            //     eval_options.apply_loss_function = true;
-            //     double initial_cost_with_loss;
-            //     if (problem.Evaluate(eval_options, &initial_cost_with_loss, nullptr, nullptr, nullptr)) {
-            //         std::cout << "Initial Cost (with loss function, as in Solver iter 0): "
-            //                 << initial_cost_with_loss << std::endl;
-            //     }
-            // }
-            // std::cout << "--------------------------------------------------------" << std::endl;
-            
-            // Solve the optimization problem
 
             // Measure the time for solving the optimization problem
             auto solve_start_time = std::chrono::high_resolution_clock::now();
@@ -4226,30 +3947,7 @@ private:
                  enable_orientation_smoothness_factor_ = original_enable_orientation_smoothness_factor;
                  max_iterations_ = original_max_iterations;
                  return false;
-            }
-
-            
-
-            // ceres::Problem::EvaluateOptions eval_options;
-            // std::vector<double> residuals;
-
-            // // Evaluate residuals after optimization
-            // problem.Evaluate(eval_options, nullptr, &residuals, nullptr, nullptr);
-
-            // // Print residuals
-            // ROS_INFO("Residuals after optimization:");
-            // for (size_t i = 0; i < residuals.size(); ++i) {
-            //     ROS_INFO("Residual[%zu]: %.6f", i, residuals[i]);
-            // }
-
-            // std::cout << summary.FullReport() << std::endl;
-
-            // output the state window after optimization
-            // for (size_t i = 0; i < variables.size(); ++i) {
-            //     ROS_INFO("Optimized state %zu: [%.2f, %.2f, %.2f]", i, variables[i].pose[0], variables[i].pose[1], variables[i].pose[2]);
-            //     ROS_INFO("Optimized state velocity %zu: [%.2f, %.2f, %.2f]", i, variables[i].velocity[0], variables[i].velocity[1], variables[i].velocity[2]);
-            // }
-                
+            }               
             
             // Update state with optimized values
             for (size_t i = 0; i < state_window_.size(); ++i) {
