@@ -1,7 +1,5 @@
 # ToySLAM GNSS/IMU Fusion Workspace
 
-## Author
-
 | Author Name | Affiliation      | Contact Email               |
 | :----------: | ---------------- | --------------------------- |
 |  Gao Yixin  | HK PolyU TAS LAB | yixin.gao@connect.polyu.hk  |
