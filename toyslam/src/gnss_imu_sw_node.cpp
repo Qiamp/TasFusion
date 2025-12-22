@@ -2,7 +2,7 @@
 * This file is part of toyslam.
 *
 * Copyright (C) 2025 Trustworthy AI and Autonomous Systems Laboratory, The Hong Kong Polytechnic University (PolyU)
-* Author: ZHAO Jiaqi (jiaqi.zhao@connect.polyu.hk) Wang Xiangru (xiangru.wang@polyu.edu.hk) Gao Yixin (yixin.gao@connect.polyu.hk)
+* Author: Wang Xiangru (xiangru.wang@polyu.edu.hk) Gao Yixin (yixin.gao@connect.polyu.hk) ZHAO Jiaqi (jiaqi.zhao@connect.polyu.hk) 
 *
 * toyslam is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
