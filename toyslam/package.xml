@@ -4,7 +4,9 @@
   <version>1.0.0</version>
   <description>The toyslam package</description>
   
-  <maintainer email="yixin.gao@connect.polyu.hk,xiangru.wang@polyu.edu.hk,jiaqi.zhao@connect.polyu.hk">Yixin Gao, Xiangru Wang, Jiaqi Zhao</maintainer>
+  <maintainer email="yixin.gao@connect.polyu.hk">Yixin Gao</maintainer>
+  <maintainer email="xiangru.wang@polyu.edu.hk">Xiangru Wang</maintainer>
+  <maintainer email="jiaqi.zhao@polyu.edu.hk">Jiaqi Zhao</maintainer>
   <license>GPL-3.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
