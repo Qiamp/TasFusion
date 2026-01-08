@@ -48,16 +48,16 @@ TasFusion is a ROS1 package designed for multi-sensor navigation. Its core funct
 
 The central sensor-fusion node supports IMU pre-integration, online bias estimation, marginalization to preserve historical information, and GPS position/velocity constraints. All major functions can be flexibly enabled or disabled through parameters configured in launch files.
 
-<table align="center">
+<table align="center" width="100%">
   <tr>
-    <td align="center">
-      <img src="img/board.png" width="380"/>
+    <td align="center" width="33%">
+      <img src="img/board.png" style="width:100%; max-width:380px;"/>
     </td>
-    <td align="center">
-      <img src="data/results/demo.gif" width="380"/>
+    <td align="center" width="33%">
+      <img src="data/results/demo.gif" style="width:100%; max-width:380px;"/>
     </td>
-    <td align="center">
-      <img src="img/longdata.png" width="380"/>
+    <td align="center" width="33%">
+      <img src="img/longdata.png" style="width:100%; max-width:380px;"/>
     </td>
   </tr>
 </table>
