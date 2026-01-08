@@ -128,7 +128,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
   ```
 
 ## Build Instructions
-
+### For Host installation
 1. **Create a workspace and clone the repository
    (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
@@ -142,6 +142,22 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
    ```bash
    cd ~/catkin_ws
    catkin_make
+   source devel/setup.bash
+   ```
+### For Docker installation
+1. **Create a workspace and clone the repository
+   (Assuming the workspace path is `~/tasfusion_ws/src`):**
+
+   ```bash
+   mkdir ~/tasfusion_ws/src
+   cd ~/tasfusion_ws/src
+   git clone https://github.com/Qiamp/TasFusion.git
+   ```
+2. **Build the workspace and source the environment** :
+
+   ```bash
+   docker build --no-cache -f src/.docker/Dockerfile -t tasfusion-dev .
+   ./src/.docker/start_docker.sh
    source devel/setup.bash
    ```
 
