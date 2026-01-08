@@ -24,7 +24,7 @@ GNSS / IMU Sliding-Window Optimization Framework
     <tr>
       <td align="center">Wang Xiangru</td>
       <td align="center">HK PolyU TAS LAB</td>
-      <td align="center">xiangru.wang@polyu.edu.hk</td>
+      <td align="center">xiangruu.wang@connect.polyu.hk</td>
     </tr>
     <tr>
       <td align="center">ZHAO Jiaqi</td>
