@@ -321,6 +321,8 @@ This project was developed in the context of the **AAE4203** course offered by t
 
 The authors would like to acknowledge the course for providing a solid theoretical foundation and practical framework in navigation, sensor fusion, and state estimation, which greatly contributed to the design and implementation of tasfusion.
 
+The authors also gratefully acknowledge the Research Center for Autonomous System in Smart Transportation, PolyU-Wuxi Technology and Innovation Research Institute, for its technical support, research environment, and resources that facilitated the development and validation of this work.
+
 ## License
 
 This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.html).
