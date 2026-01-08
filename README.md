@@ -172,13 +172,14 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
    (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
    ```bash
-   mkdir ~/tasfusion_ws/src
+   mkdir -p ~/tasfusion_ws/src
    cd ~/tasfusion_ws/src
-   git clone https://github.com/Qiamp/TasFusion.git
+   git clone https://github.com/Qiamp/TasFusion.git .
    ```
 2. **Build the workspace and source the environment** :
 
    ```bash
+   cd ~/tasfusion_ws
    docker build --no-cache -f src/.docker/Dockerfile -t tasfusion-dev .
    ./src/.docker/start_docker.sh
    source devel/setup.bash
